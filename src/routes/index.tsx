@@ -46,7 +46,7 @@ import { ShopProvider, useShop } from "@/lib/cart";
 import { CartSheet } from "@/components/CartSheet";
 import { ThumbNav } from "@/components/ThumbNav";
 import { ShoppingAssistant } from "@/components/ShoppingAssistant";
-import { ProductCard } from "@/components/ProductCard";
+import { ProductCard, productCardVariants } from "@/components/ProductCard";
 import heroImg from "@/assets/hero-headphones.jpg";
 import aboutImg from "@/assets/about-showroom.jpg";
 import { useLocalizedCopy } from "@/lib/copywriting";
@@ -430,16 +430,32 @@ function Categories() {
   );
 }
 
+const staggerGridVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.04,
+    },
+  },
+};
+
 function BestSellers() {
   return (
     <section className="mx-3 md:mx-6 mt-6">
       <GlassCard className="p-6 md:p-8">
         <SectionHeader title="Más vendidos" />
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <motion.div
+          variants={staggerGridVariants}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.05 }}
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+        >
           {bestSellers.map((p, i) => (
             <ProductCard key={p.name} {...p} badge={`#${i + 1}`} />
           ))}
-        </div>
+        </motion.div>
       </GlassCard>
     </section>
   );
@@ -450,11 +466,17 @@ function Products() {
     <section id="productos" className="mx-3 md:mx-6 mt-6 scroll-mt-24">
       <GlassCard className="p-6 md:p-8">
         <SectionHeader title="Productos de la tienda" />
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <motion.div
+          variants={staggerGridVariants}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.05 }}
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+        >
           {products.map((p) => (
             <ProductCard key={p.name} {...p} compact />
           ))}
-        </div>
+        </motion.div>
       </GlassCard>
     </section>
   );
@@ -495,11 +517,17 @@ function Recent() {
     <section className="mx-3 md:mx-6 mt-6">
       <GlassCard className="p-6 md:p-8">
         <SectionHeader title="Productos recientes" />
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <motion.div
+          variants={staggerGridVariants}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.05 }}
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+        >
           {recent.map((p) => (
             <ProductCard key={p.name} {...p} badge="NUEVO" compact />
           ))}
-        </div>
+        </motion.div>
       </GlassCard>
     </section>
   );

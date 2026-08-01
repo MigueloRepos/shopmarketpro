@@ -23,7 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useShop } from "@/lib/cart";
-import { ProductCard } from "@/components/ProductCard";
+import { ProductCard, productCardVariants } from "@/components/ProductCard";
 import { CartSheet } from "@/components/CartSheet";
 import { ThumbNav } from "@/components/ThumbNav";
 import { ShoppingAssistant } from "@/components/ShoppingAssistant";
@@ -34,6 +34,16 @@ import { csvProducts, allProducts } from "@/lib/catalog";
 export const Route = createFileRoute("/tienda")({
   component: StorePage,
 });
+
+const gridContainerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.04,
+    },
+  },
+};
 
 function GlassCard({
   children,
@@ -465,11 +475,18 @@ function StorePage() {
                 </Button>
               </GlassCard>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <motion.div
+                key={`${selectedCategory}-${sortBy}-${searchQuery}`}
+                variants={gridContainerVariants}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.05 }}
+                className="grid grid-cols-2 md:grid-cols-3 gap-4"
+              >
                 {filteredProducts.map((p) => (
                   <ProductCard key={p.name} {...p} compact />
                 ))}
-              </div>
+              </motion.div>
             )}
           </div>
         </div>

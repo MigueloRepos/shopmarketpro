@@ -60,6 +60,21 @@ export interface ProductCardProps {
   image?: string;
 }
 
+export const productCardVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.97 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 85,
+      damping: 16,
+      mass: 0.8,
+    },
+  },
+};
+
 export function ProductCard({
   name,
   price,
@@ -94,7 +109,8 @@ export function ProductCard({
 
   return (
     <motion.div
-      whileHover={{ y: -6 }}
+      variants={productCardVariants}
+      whileHover={{ y: -6, scale: 1.01 }}
       className="group glass rounded-2xl p-3 flex flex-col gap-2 relative overflow-hidden"
     >
       {badge && (
