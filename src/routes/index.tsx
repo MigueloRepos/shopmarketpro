@@ -50,6 +50,7 @@ import { ProductCard, productCardVariants } from "@/components/ProductCard";
 import heroImg from "@/assets/hero-headphones.jpg";
 import aboutImg from "@/assets/about-showroom.jpg";
 import { useLocalizedCopy } from "@/lib/copywriting";
+import { csvProducts, allProducts } from "@/lib/catalog";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -440,6 +441,30 @@ const staggerGridVariants = {
   },
 };
 
+const storeProducts6 = (() => {
+  const seen = new Set<string>();
+  const merged = [...csvProducts, ...allProducts];
+  return merged
+    .filter((item) => {
+      if (seen.has(item.name)) return false;
+      seen.add(item.name);
+      return true;
+    })
+    .slice(0, 6);
+})();
+
+const storeProducts12 = (() => {
+  const seen = new Set<string>();
+  const merged = [...csvProducts, ...allProducts];
+  return merged
+    .filter((item) => {
+      if (seen.has(item.name)) return false;
+      seen.add(item.name);
+      return true;
+    })
+    .slice(0, 12);
+})();
+
 function BestSellers() {
   return (
     <section className="mx-3 md:mx-6 mt-6">
@@ -450,9 +475,9 @@ function BestSellers() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, amount: 0.05 }}
-          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4"
         >
-          {bestSellers.map((p, i) => (
+          {storeProducts6.map((p, i) => (
             <ProductCard key={p.name} {...p} badge={`#${i + 1}`} />
           ))}
         </motion.div>
@@ -471,9 +496,9 @@ function Products() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, amount: 0.05 }}
-          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4"
         >
-          {products.map((p) => (
+          {storeProducts12.map((p) => (
             <ProductCard key={p.name} {...p} compact />
           ))}
         </motion.div>
