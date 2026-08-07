@@ -1,5 +1,18 @@
 import { useState, useEffect } from "react";
-import { Heart, Share2, X, MessageCircle, Star, Plus, Copy, Twitter } from "lucide-react";
+import {
+  Heart,
+  Share2,
+  X,
+  MessageCircle,
+  Star,
+  Plus,
+  Copy,
+  Twitter,
+  Store,
+  CheckCircle2,
+  ArrowRight,
+  Zap,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { useShop } from "@/lib/cart";
@@ -58,6 +71,8 @@ export interface ProductCardProps {
   badge?: string;
   compact?: boolean;
   image?: string;
+  seller?: string;
+  sellerVerified?: boolean;
 }
 
 export const productCardVariants = {
@@ -84,8 +99,10 @@ export function ProductCard({
   badge,
   compact,
   image,
+  seller,
+  sellerVerified = true,
 }: ProductCardProps) {
-  const { add } = useShop();
+  const { add, setCartOpen } = useShop();
   const [imgLoaded, setImgLoaded] = useState(false);
   const [isSimulatedLoading, setIsSimulatedLoading] = useState(true);
   const [isSharing, setIsSharing] = useState(false);
@@ -111,16 +128,16 @@ export function ProductCard({
     <motion.div
       variants={productCardVariants}
       whileHover={{ y: -6, scale: 1.01 }}
-      className="group glass rounded-2xl p-3 flex flex-col gap-2 relative overflow-hidden"
+      className="group glass rounded-2xl p-3 flex flex-col gap-2 relative overflow-hidden border border-white/60 hover:shadow-xl transition-all duration-300"
     >
       {badge && (
-        <Badge className="absolute top-4 left-4 bg-accent/90 hover:bg-accent text-accent-foreground rounded-full z-10 border-0">
+        <Badge className="absolute top-4 left-4 bg-accent/90 hover:bg-accent text-accent-foreground rounded-full z-10 border-0 font-bold text-[10px]">
           {badge}
         </Badge>
       )}
-      {discount > 0 && !badge && (
-        <Badge className="absolute top-4 left-4 bg-rose-500 hover:bg-rose-500 text-white rounded-full z-10 border-0">
-          -{discount}%
+      {discount > 0 && (
+        <Badge className="absolute top-4 right-4 bg-rose-500 hover:bg-rose-500 text-white rounded-full z-10 border-0 font-bold text-[10px] shadow-sm">
+          -{discount}% DTO
         </Badge>
       )}
 
@@ -232,6 +249,11 @@ export function ProductCard({
       </div>
       <div className="px-1 flex-1 flex flex-col justify-between">
         <div>
+          <div className="flex items-center gap-1 mb-1 text-[11px] font-semibold text-accent/90 truncate">
+            <Sparkles className="w-3 h-3 text-accent shrink-0" />
+            <span>Tienda Oficial Lumina</span>
+            <CheckCircle2 className="w-3 h-3 text-emerald-500 fill-emerald-500/10 shrink-0" />
+          </div>
           <h3 className="font-semibold text-sm leading-snug line-clamp-2 min-h-[40px]">{name}</h3>
           {rating !== undefined && (
             <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
@@ -241,23 +263,87 @@ export function ProductCard({
             </div>
           )}
         </div>
-        <div className="flex items-center justify-between mt-2">
-          <div className="flex items-baseline gap-2">
-            <span className="font-bold">{fmt(price)}</span>
-            {old && <span className="text-xs text-muted-foreground line-through">{fmt(old)}</span>}
+        <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/30 gap-1">
+          <div className="flex flex-col">
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-bold text-base text-foreground">{fmt(price)}</span>
+              {old && (
+                <span className="text-xs text-muted-foreground line-through">{fmt(old)}</span>
+              )}
+            </div>
+            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-0.5">
+              Envío 24h Disponibilidad Inmediata
+            </span>
           </div>
-          <button
-            onClick={() => {
-              add({ name, price });
-              toast.success(`${name} añadido al carrito`);
-            }}
-            aria-label="Añadir al carrito"
-            className="w-8 h-8 rounded-full bg-foreground text-background grid place-items-center hover:scale-110 transition cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-          </button>
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={() => {
+                add({ name, price });
+                setCartOpen(true);
+                toast.success(`Pedir ahora: ${name}`);
+              }}
+              className="relative group/btn px-3.5 py-1.5 rounded-full bg-accent text-accent-foreground font-black text-xs animate-pulse-soft hover-glow-accent shadow-md cursor-pointer whitespace-nowrap flex items-center gap-1 overflow-hidden transition-all duration-300"
+            >
+              <span className="relative z-10 flex items-center gap-1">
+                PEDIR AHORA
+                <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-0.5" />
+              </span>
+              <span className="absolute inset-0 bg-gradient-to-r from-accent via-fuchsia-500 to-amber-500 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />
+            </button>
+            <button
+              onClick={() => {
+                add({ name, price });
+                toast.success(`${name} añadido al carrito`);
+              }}
+              aria-label="Añadir al carrito"
+              className="w-8 h-8 rounded-full bg-foreground text-background grid place-items-center hover:scale-110 transition cursor-pointer shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
     </motion.div>
+  );
+}
+
+export function ProductCardSkeleton({ compact }: { compact?: boolean }) {
+  return (
+    <div className="glass rounded-2xl p-3 flex flex-col gap-2 relative overflow-hidden animate-pulse">
+      {/* Image container skeleton with matching aspect ratio */}
+      <div
+        className={`relative rounded-xl overflow-hidden bg-muted-foreground/10 ${
+          compact ? "aspect-square" : "aspect-[4/3]"
+        }`}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite]" />
+      </div>
+
+      {/* Info container skeleton */}
+      <div className="px-1 flex-1 flex flex-col justify-between">
+        <div className="space-y-2 mt-1">
+          {/* Title skeleton */}
+          <div className="h-4 bg-muted-foreground/15 rounded-md w-11/12" />
+          <div className="h-4 bg-muted-foreground/15 rounded-md w-2/3" />
+
+          {/* Star Rating skeleton */}
+          <div className="flex items-center gap-1.5 pt-1">
+            <div className="w-3.5 h-3.5 bg-muted-foreground/15 rounded-full" />
+            <div className="h-3 bg-muted-foreground/15 rounded-md w-8" />
+            <div className="h-3 bg-muted-foreground/15 rounded-md w-12" />
+          </div>
+        </div>
+
+        {/* Price & Action skeleton */}
+        <div className="flex items-center justify-between mt-4">
+          <div className="flex items-baseline gap-1.5">
+            <div className="h-5 bg-muted-foreground/20 rounded-md w-14" />
+            <div className="h-3.5 bg-muted-foreground/10 rounded-md w-8" />
+          </div>
+          <div className="w-8 h-8 rounded-full bg-muted-foreground/20 shrink-0 animate-pulse" />
+        </div>
+      </div>
+    </div>
   );
 }

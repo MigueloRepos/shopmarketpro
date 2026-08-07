@@ -36,6 +36,10 @@ import {
   X,
   MessageCircle,
   Copy,
+  Store,
+  Building2,
+  CheckCircle2,
+  Tag,
 } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
@@ -46,11 +50,13 @@ import { ShopProvider, useShop } from "@/lib/cart";
 import { CartSheet } from "@/components/CartSheet";
 import { ThumbNav } from "@/components/ThumbNav";
 import { ShoppingAssistant } from "@/components/ShoppingAssistant";
-import { ProductCard, productCardVariants } from "@/components/ProductCard";
+import { ProductCard, productCardVariants, ProductCardSkeleton } from "@/components/ProductCard";
+import { TopConversionBar } from "@/components/TopConversionBar";
+import { SalesNotificationTicker } from "@/components/SalesNotificationTicker";
 import heroImg from "@/assets/hero-headphones.jpg";
 import aboutImg from "@/assets/about-showroom.jpg";
 import { useLocalizedCopy } from "@/lib/copywriting";
-import { csvProducts, allProducts } from "@/lib/catalog";
+import { csvProducts, allProducts, featuredVendors } from "@/lib/catalog";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -158,7 +164,7 @@ function Navbar() {
       }`}
     >
       <div
-        className={`transition-all duration-500 rounded-full flex items-center gap-4 border ${
+        className={`transition-all duration-500 rounded-full flex items-center gap-3 border ${
           scrolled
             ? "glass-strong py-2.5 px-5 shadow-lg border-white/60"
             : "glass-subtle py-4 px-6 border-transparent bg-white/10 shadow-none"
@@ -167,11 +173,14 @@ function Navbar() {
         <a href="#inicio" className="flex items-center gap-2 shrink-0">
           <Sparkles className="w-5 h-5 text-accent" />
           <span className="font-black text-lg tracking-tight">LUMINA</span>
+          <span className="hidden sm:inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent/20 text-accent uppercase tracking-wider">
+            Tienda Oficial
+          </span>
         </a>
-        <div className="hidden lg:flex items-center gap-1 ml-4 text-sm font-medium">
+        <div className="hidden lg:flex items-center gap-1 ml-2 text-sm font-medium">
           <a
             href="#inicio"
-            className="px-3 py-1.5 rounded-full transition-all duration-300 hover:bg-white/60 underline underline-offset-4"
+            className="px-3 py-1.5 rounded-full transition-all duration-300 hover:bg-white/60"
           >
             Inicio
           </a>
@@ -187,12 +196,6 @@ function Navbar() {
             className="px-3 py-1.5 rounded-full transition-all duration-300 hover:bg-white/60"
           >
             Categorías
-          </a>
-          <a
-            href="#productos"
-            className="px-3 py-1.5 rounded-full transition-all duration-300 hover:bg-white/60"
-          >
-            Productos
           </a>
           <a
             href="#nosotros"
@@ -212,32 +215,20 @@ function Navbar() {
           <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar productos…"
+              placeholder="Buscar en la tienda oficial..."
               className={`pl-9 rounded-full bg-white/60 border-white/60 transition-all duration-300 ${
                 scrolled ? "h-8 text-xs" : "h-9 text-sm"
               }`}
             />
           </div>
         </div>
-        <div className="flex items-center gap-1 ml-auto md:ml-2">
+        <div className="flex items-center gap-1.5 ml-auto md:ml-2">
           <button
             aria-label="Asistente IA"
             onClick={() => setAssistantOpen(true)}
             className="p-2 rounded-full hover:bg-white/60 transition"
           >
             <MessageCircleHeart className="w-5 h-5" />
-          </button>
-          <button
-            aria-label="Favoritos"
-            className="hidden sm:grid p-2 rounded-full hover:bg-white/60 transition"
-          >
-            <Heart className="w-5 h-5" />
-          </button>
-          <button
-            aria-label="Cuenta"
-            className="hidden sm:grid p-2 rounded-full hover:bg-white/60 transition"
-          >
-            <User className="w-5 h-5" />
           </button>
           <button
             aria-label="Carrito"
@@ -258,8 +249,6 @@ function Navbar() {
 }
 
 function Hero() {
-  const { headline, subheadline, greeting } = useLocalizedCopy();
-
   return (
     <section
       id="inicio"
@@ -279,17 +268,18 @@ function Hero() {
           <div className="animate-fade-up">
             <div className="inline-flex items-center gap-2.5 glass-subtle border border-white/60 rounded-full px-4 py-2 text-[10px] md:text-xs font-semibold uppercase tracking-[0.2em] text-foreground/80 shadow-sm">
               <Sparkles className="w-3.5 h-3.5 text-accent animate-pulse" />
-              {greeting} • Edición Limitada 2026
+              LUMINA OFFICIAL STORE • TIENDA DIRECTA
             </div>
           </div>
 
           <div className="space-y-4 animate-fade-up [animation-delay:150ms]">
-            <h1
-              className="font-display text-4xl xs:text-5xl md:text-7xl xl:text-[5.5rem] leading-[0.92] font-normal tracking-tight text-foreground"
-              dangerouslySetInnerHTML={{ __html: headline }}
-            />
+            <h1 className="font-display text-4xl xs:text-5xl md:text-7xl xl:text-[5.2rem] leading-[0.93] font-normal tracking-tight text-foreground">
+              Tu Tienda Exclusiva de{" "}
+              <span className="font-serif italic text-accent">Tecnología y Estilo</span>
+            </h1>
             <p className="text-muted-foreground/90 text-sm xs:text-base md:text-lg max-w-lg leading-relaxed font-sans font-light">
-              {subheadline}
+              Descubre nuestra colección oficial. Todos los envíos son procesados directamente por
+              nosotros en 24h, con garantía oficial de 3 años y atención personalizada.
             </p>
           </div>
 
@@ -300,7 +290,7 @@ function Hero() {
               className="rounded-full h-12 sm:h-13 px-6 sm:px-8 bg-foreground text-background hover:bg-foreground/90 transition-all duration-300 hover:scale-[1.02] active:scale-98 shadow-glow text-xs sm:text-sm font-medium tracking-wide flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
             >
               <Link to="/tienda">
-                Comprar ahora
+                Explorar Catálogo
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </Button>
@@ -310,19 +300,19 @@ function Hero() {
               asChild
               className="rounded-full h-12 sm:h-13 px-6 sm:px-8 glass border-white/60 hover:bg-white/40 transition-all duration-300 text-xs sm:text-sm font-medium flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
             >
-              <Link to="/tienda">
-                Ver catálogo
-                <Play className="w-3 h-3 fill-current" />
-              </Link>
+              <a href="#nosotros">
+                <ShieldCheck className="w-4 h-4 text-accent" />
+                Garantía y Calidad Directa
+              </a>
             </Button>
           </div>
 
-          {/* Minimalist Editorial Stats instead of nested boxes */}
+          {/* Minimalist Editorial Stats */}
           <div className="pt-6 sm:pt-8 border-t border-white/20 grid grid-cols-3 gap-3 xs:gap-4 md:gap-6 animate-fade-up [animation-delay:450ms]">
             {[
-              { k: "4.9/5", v: "VALORACIÓN" },
-              { k: "100%", v: "MATERIALES" },
-              { k: "24h", v: "ENTREGA" },
+              { k: "100%", v: "DIRECTO DE FÁBRICA" },
+              { k: "24H", v: "ENVÍO EXPRÉS" },
+              { k: "3 AÑOS", v: "GARANTÍA OFICIAL" },
             ].map((s, i) => (
               <div
                 key={s.k}
@@ -349,7 +339,7 @@ function Hero() {
             <div className="w-full h-full rounded-[1.4rem] xs:rounded-[1.8rem] overflow-hidden bg-gradient-to-b from-white to-secondary/20 relative group">
               <img
                 src={heroImg}
-                alt="Auriculares premium Lumina"
+                alt="Tienda Oficial Lumina"
                 width={1200}
                 height={1200}
                 className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-1000 ease-out"
@@ -358,30 +348,31 @@ function Hero() {
             </div>
           </div>
 
-          {/* Luxury Specification Float Tag (Offset timing) */}
-          <div className="absolute -bottom-2 sm:-bottom-4 left-2 sm:-left-2 md:-left-6 glass-strong rounded-2xl p-3 sm:p-4 max-w-[160px] xs:max-w-[210px] border border-white/60 shadow-glow animate-float [animation-delay:2s] z-20">
+          {/* Luxury Floating Tag 1 */}
+          <div className="absolute -bottom-2 sm:-bottom-4 left-2 sm:-left-2 md:-left-6 glass-strong rounded-2xl p-3 sm:p-4 max-w-[170px] xs:max-w-[220px] border border-white/60 shadow-glow animate-float [animation-delay:2s] z-20">
             <div className="flex items-center gap-2 mb-1 sm:mb-1.5">
               <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-accent/25 grid place-items-center shrink-0">
-                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-accent animate-pulse" />
+                <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-accent" />
               </div>
               <span className="font-semibold text-[10px] sm:text-xs tracking-wide text-foreground">
-                Artesanía
+                Garantía Lumina 3 Años
               </span>
             </div>
             <p className="text-[9px] sm:text-[11px] text-muted-foreground leading-normal">
-              Acústica refinada con transductores de berilio.
+              Atención prioritaria y reemplazo directo sin intermediarios.
             </p>
           </div>
 
-          {/* Luxury Certification Tag (Offset timing) */}
-          <div className="absolute -top-3 sm:-top-6 right-2 sm:-right-2 md:-right-6 glass-strong rounded-2xl p-3 sm:p-4 max-w-[140px] xs:max-w-[190px] border border-white/60 shadow-glow animate-float [animation-delay:4s] z-20">
-            <div className="flex items-center gap-2 mb-1">
+          {/* Luxury Floating Tag 2 */}
+          <div className="absolute -top-3 sm:-top-6 right-2 sm:-right-2 md:-right-6 glass-strong rounded-2xl p-3 sm:p-4 max-w-[150px] xs:max-w-[200px] border border-white/60 shadow-glow animate-float [animation-delay:4s] z-20">
+            <div className="flex items-center gap-1.5 mb-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 fill-emerald-500/10" />
               <span className="text-[9px] sm:text-[10px] tracking-widest text-accent font-bold uppercase">
-                LUMINA PRO
+                TIENDA OFICIAL
               </span>
             </div>
             <p className="text-[9px] sm:text-[11px] text-foreground font-medium">
-              30h de autonomía acústica total.
+              Stock 100% propio con envío prioritario en 24h.
             </p>
           </div>
         </div>
@@ -466,42 +457,349 @@ const storeProducts12 = (() => {
 })();
 
 function BestSellers() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 450);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <section className="mx-3 md:mx-6 mt-6">
       <GlassCard className="p-6 md:p-8">
         <SectionHeader title="Más vendidos" />
-        <motion.div
-          variants={staggerGridVariants}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.05 }}
-          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4"
-        >
-          {storeProducts6.map((p, i) => (
-            <ProductCard key={p.name} {...p} badge={`#${i + 1}`} />
-          ))}
-        </motion.div>
+        {isLoading ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : (
+          <motion.div
+            variants={staggerGridVariants}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.05 }}
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4"
+          >
+            {storeProducts6.map((p, i) => (
+              <ProductCard key={p.name} {...p} badge={`#${i + 1}`} />
+            ))}
+          </motion.div>
+        )}
       </GlassCard>
     </section>
   );
 }
 
 function Products() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 550);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <section id="productos" className="mx-3 md:mx-6 mt-6 scroll-mt-24">
       <GlassCard className="p-6 md:p-8">
         <SectionHeader title="Productos de la tienda" />
-        <motion.div
-          variants={staggerGridVariants}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.05 }}
-          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4"
-        >
-          {storeProducts12.map((p) => (
-            <ProductCard key={p.name} {...p} compact />
+        {isLoading ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <ProductCardSkeleton key={i} compact />
+            ))}
+          </div>
+        ) : (
+          <motion.div
+            variants={staggerGridVariants}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.05 }}
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4"
+          >
+            {storeProducts12.map((p) => (
+              <ProductCard key={p.name} {...p} compact />
+            ))}
+          </motion.div>
+        )}
+      </GlassCard>
+    </section>
+  );
+}
+
+function FlashSaleDeals() {
+  const { add, setCartOpen } = useShop();
+  const [timeLeft, setTimeLeft] = useState({ hours: 3, minutes: 42, seconds: 15 });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
+        if (prev.minutes > 0) return { ...prev, minutes: 59, seconds: 59 };
+        if (prev.hours > 0) return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
+        return { hours: 3, minutes: 0, seconds: 0 };
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const flashItems = [
+    {
+      name: "Auriculares Wireless Lumina Pro",
+      price: 89.99,
+      old: 149.99,
+      sold: 86,
+      stock: 4,
+      image:
+        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=80",
+      seller: "Lumina Official Store",
+    },
+    {
+      name: "Reloj Inteligente Ultra AMOLED",
+      price: 69.99,
+      old: 119.99,
+      sold: 92,
+      stock: 2,
+      image:
+        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=80",
+      seller: "TechWorld Global",
+    },
+    {
+      name: "Proyector Portátil Full HD",
+      price: 139.99,
+      old: 229.99,
+      sold: 78,
+      stock: 5,
+      image:
+        "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop&q=80",
+      seller: "Lumina Official Store",
+    },
+    {
+      name: "Mochila Antirrobo e Impermeable",
+      price: 34.99,
+      old: 69.99,
+      sold: 95,
+      stock: 3,
+      image:
+        "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&auto=format&fit=crop&q=80",
+      seller: "Urban Style Co.",
+    },
+  ];
+
+  const pad = (n: number) => String(n).padStart(2, "0");
+
+  return (
+    <section className="mx-3 md:mx-6 mt-6">
+      <div className="glass-strong rounded-3xl p-6 md:p-8 border-2 border-rose-500/30 bg-gradient-to-br from-rose-500/5 via-fuchsia-500/5 to-accent/5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/40">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 text-rose-600 dark:text-rose-400 font-bold text-xs uppercase tracking-wider">
+              <Zap className="w-3.5 h-3.5 fill-current animate-bounce" />
+              Ofertas Relámpago - Exclusivo Hoy
+            </div>
+            <h2 className="font-display text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+              Descuentos de Hasta el <span className="text-rose-500 font-black">-50% DTO</span>
+            </h2>
+            <p className="text-xs md:text-sm text-muted-foreground">
+              Unidades limitadas con garantía de precio mínimo y envío exprés en 24h.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 bg-black/80 text-white px-4 py-2.5 rounded-2xl border border-white/20 self-start md:self-auto shadow-lg">
+            <span className="text-xs text-white/70 font-medium">La oferta termina en:</span>
+            <div className="flex items-center gap-1 font-mono text-sm font-bold text-amber-400">
+              <span className="bg-white/10 px-2 py-1 rounded">{pad(timeLeft.hours)}h</span>:
+              <span className="bg-white/10 px-2 py-1 rounded">{pad(timeLeft.minutes)}m</span>:
+              <span className="bg-white/10 px-2 py-1 rounded text-rose-400 animate-pulse">
+                {pad(timeLeft.seconds)}s
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-6">
+          {flashItems.map((item) => {
+            const discount = Math.round(((item.old - item.price) / item.old) * 100);
+            return (
+              <div
+                key={item.name}
+                className="glass rounded-2xl p-4 border border-white/60 flex flex-col justify-between relative group hover:border-rose-500/50 hover:shadow-xl transition-all duration-300"
+              >
+                <div className="absolute top-3 left-3 z-10 bg-rose-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-md">
+                  -{discount}% OPORTUNIDAD
+                </div>
+
+                <div className="aspect-[4/3] rounded-xl overflow-hidden bg-white/40 mb-3 relative">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+
+                <div className="space-y-2 flex-1 flex flex-col justify-between">
+                  <div>
+                    <div className="text-[10px] font-semibold text-muted-foreground flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                      {item.seller}
+                    </div>
+                    <h3 className="font-bold text-sm leading-snug line-clamp-2 mt-0.5">
+                      {item.name}
+                    </h3>
+                  </div>
+
+                  <div className="space-y-1.5 pt-2">
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-black text-lg text-rose-600 dark:text-rose-400">
+                        {fmt(item.price)}
+                      </span>
+                      <span className="text-xs text-muted-foreground line-through font-medium">
+                        {fmt(item.old)}
+                      </span>
+                    </div>
+
+                    {/* Stock Bar Meter */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[10px] font-bold">
+                        <span className="text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                          <Zap className="w-3 h-3 fill-current" />
+                          🔥 ¡Solo quedan {item.stock}!
+                        </span>
+                        <span className="text-muted-foreground">{item.sold}% vendido</span>
+                      </div>
+                      <div className="w-full h-2 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-rose-500 to-amber-500 rounded-full"
+                          style={{ width: `${item.sold}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <Button
+                      onClick={() => {
+                        add({ name: item.name, price: item.price });
+                        setCartOpen(true);
+                        toast.success(`¡OFERTA RELÁMPAGO! ${item.name}`);
+                      }}
+                      className="w-full rounded-full h-10 bg-gradient-to-r from-rose-600 via-rose-500 to-amber-500 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer shadow-md animate-pulse-soft hover-glow-accent mt-2 relative group/btn overflow-hidden border border-white/20"
+                    >
+                      <span className="relative z-10 flex items-center gap-1.5">
+                        <Zap className="w-3.5 h-3.5 fill-amber-300 text-amber-300 animate-bounce" />
+                        PEDIR AHORA EN 1 CLIC
+                        <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-1" />
+                      </span>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CustomerReviewsSection() {
+  const reviews = [
+    {
+      name: "María Fernández",
+      city: "Madrid",
+      rating: 5,
+      date: "Hace 2 días",
+      product: "Auriculares Wireless Lumina Pro",
+      text: "Llegaron en 24 horas exactas a Madrid. La calidad del sonido es fantástica y la atención por WhatsApp fue súper rápida.",
+      avatar:
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+    },
+    {
+      name: "Alejandro Gómez",
+      city: "Barcelona",
+      rating: 5,
+      date: "Hace 3 días",
+      product: "Reloj Inteligente Ultra AMOLED",
+      text: "Súper contento con la compra. El empaque venía muy protegido y la batería dura más de 5 días. 100% recomendado.",
+      avatar:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+    },
+    {
+      name: "Carmen Ruiz",
+      city: "Valencia",
+      rating: 5,
+      date: "Hace 5 días",
+      product: "Proyector Portátil HD",
+      text: "Comprar a través de los vendedores verificados de Lumina me dio total tranquilidad. Todo transparente y perfecto.",
+      avatar:
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
+    },
+  ];
+
+  return (
+    <section className="mx-3 md:mx-6 mt-6">
+      <GlassCard className="p-6 md:p-10">
+        <div className="text-center max-w-xl mx-auto space-y-2 mb-8">
+          <div className="inline-flex items-center gap-1 text-amber-500 font-bold text-sm bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
+            <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+            4.9 / 5.0 Rating Excelente
+          </div>
+          <h2 className="font-display text-2xl md:text-3xl font-bold">
+            Lo que dicen nuestros{" "}
+            <span className="text-accent italic font-light">Clientes Verificados</span>
+          </h2>
+          <p className="text-xs md:text-sm text-muted-foreground">
+            Más de 3,420 compras entregadas con éxito este mes con satisfacción garantizada.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-4">
+          {reviews.map((r) => (
+            <div
+              key={r.name}
+              className="glass-subtle rounded-2xl p-5 border border-white/60 space-y-3 flex flex-col justify-between"
+            >
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: r.rating }).map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+                  <span className="text-[10px] text-muted-foreground font-medium">{r.date}</span>
+                </div>
+
+                <p className="text-xs leading-relaxed text-foreground/90 font-medium italic">
+                  "{r.text}"
+                </p>
+              </div>
+
+              <div className="pt-3 border-t border-white/30 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <img
+                    src={r.avatar}
+                    alt={r.name}
+                    className="w-8 h-8 rounded-full object-cover border border-white/80"
+                  />
+                  <div>
+                    <div className="text-xs font-bold flex items-center gap-1">
+                      {r.name}
+                      <CheckCircle2 className="w-3 h-3 text-emerald-500 fill-emerald-500/20" />
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">{r.city}</div>
+                  </div>
+                </div>
+
+                <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-0 text-[9px] font-bold">
+                  Comprador Verificado
+                </Badge>
+              </div>
+            </div>
           ))}
-        </motion.div>
+        </div>
       </GlassCard>
     </section>
   );
@@ -538,21 +836,38 @@ function WhyUs() {
 }
 
 function Recent() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 650);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <section className="mx-3 md:mx-6 mt-6">
       <GlassCard className="p-6 md:p-8">
         <SectionHeader title="Productos recientes" />
-        <motion.div
-          variants={staggerGridVariants}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.05 }}
-          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
-        >
-          {recent.map((p) => (
-            <ProductCard key={p.name} {...p} badge="NUEVO" compact />
-          ))}
-        </motion.div>
+        {isLoading ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <ProductCardSkeleton key={i} compact />
+            ))}
+          </div>
+        ) : (
+          <motion.div
+            variants={staggerGridVariants}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.05 }}
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+          >
+            {recent.map((p) => (
+              <ProductCard key={p.name} {...p} badge="NUEVO" compact />
+            ))}
+          </motion.div>
+        )}
       </GlassCard>
     </section>
   );
@@ -697,6 +1012,204 @@ function Footer() {
   );
 }
 
+function OfficialStoreBenefitsSection() {
+  const benefits = [
+    {
+      icon: Truck,
+      title: "Envío 24/48h Desde Almacén Propio",
+      desc: "Despachamos todos los pedidos directamente desde nuestra central logística en menos de 24 horas laborables.",
+      badge: "Logística Directa",
+      hue: "text-blue-500 bg-blue-500/10 border-blue-500/20",
+    },
+    {
+      icon: ShieldCheck,
+      title: "Garantía Oficial de 3 Años",
+      desc: "Cobertura total contra defectos de fabricación con reemplazo directo inmediato sin costes de envío.",
+      badge: "Marca Oficial",
+      hue: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
+    },
+    {
+      icon: CheckCircle2,
+      title: "Control de Calidad Unitario",
+      desc: "Cada unidad es probada e inspeccionada técnicamente antes de ser empaquetada para garantizar rendimiento óptimo.",
+      badge: "Certificado Lumina",
+      hue: "text-violet-500 bg-violet-500/10 border-violet-500/20",
+    },
+    {
+      icon: Award,
+      title: "Soporte VIP Directo 24/7",
+      desc: "Atención personalizada por WhatsApp y llamada telefónica directa con nuestro equipo de especialistas.",
+      badge: "Atención VIP",
+      hue: "text-amber-500 bg-amber-500/10 border-amber-500/20",
+    },
+  ];
+
+  return (
+    <section id="ventajas" className="mx-3 md:mx-6 mt-10 scroll-mt-24">
+      <GlassCard className="p-6 md:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-2">
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/15 text-accent text-xs font-bold uppercase tracking-wider mb-2">
+              <Sparkles className="w-3.5 h-3.5" />
+              Experiencia Lumina Directa
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+              ¿Por qué Comprar Directamente en Nuestra Tienda Oficial?
+            </h2>
+            <p className="text-xs md:text-sm text-muted-foreground mt-1">
+              Sin intermediarios ni terceros. Calidad superior, garantía asegurada y la mejor
+              experiencia de compra.
+            </p>
+          </div>
+          <Link
+            to="/tienda"
+            className="text-sm font-semibold text-accent hover:underline inline-flex items-center gap-1 shrink-0"
+          >
+            Ver catálogo completo <ChevronRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {benefits.map((b, i) => (
+            <motion.div
+              key={b.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.08 }}
+              className="glass-subtle rounded-2xl p-5 flex flex-col justify-between border border-white/60 hover:bg-white/40 transition group relative"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className={`w-10 h-10 rounded-xl grid place-items-center border ${b.hue}`}>
+                    <b.icon className="w-5 h-5" />
+                  </div>
+                  <Badge className="text-[9px] px-2 py-0.5 bg-accent/20 text-accent border-0 font-bold uppercase tracking-wider">
+                    {b.badge}
+                  </Badge>
+                </div>
+
+                <h3 className="font-bold text-base leading-snug group-hover:text-accent transition-colors">
+                  {b.title}
+                </h3>
+
+                <p className="text-xs text-muted-foreground leading-relaxed">{b.desc}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </GlassCard>
+    </section>
+  );
+}
+
+function OfficialStoreGuarantees() {
+  const guarantees = [
+    {
+      icon: ShieldCheck,
+      title: "Garantía de Devolución",
+      desc: "Prueba cualquier producto durante 30 días. Si no cumple tus expectativas, te devolvemos el 100% de tu dinero.",
+      hue: "text-emerald-500 bg-emerald-100/60",
+    },
+    {
+      icon: Award,
+      title: "Productos 100% Originales",
+      desc: "Fabricación directa con materiales de primera calidad, acabados de precisión y estándares internacionales.",
+      hue: "text-violet-500 bg-violet-100/60",
+    },
+    {
+      icon: Truck,
+      title: "Seguimiento en Tiempo Real",
+      desc: "Recibe actualizaciones inmediatas por SMS y WhatsApp desde que tu pedido sale de nuestro almacén.",
+      hue: "text-blue-500 bg-blue-100/60",
+    },
+    {
+      icon: Sparkles,
+      title: "Empaque Premium de Regalo",
+      desc: "Todos nuestros envíos incluyen estuche protector exclusivo sin coste adicional.",
+      hue: "text-amber-500 bg-amber-100/60",
+    },
+  ];
+
+  return (
+    <section className="mx-3 md:mx-6 mt-10">
+      <GlassCard className="p-6 md:p-10">
+        <div className="text-center max-w-2xl mx-auto mb-8 space-y-2">
+          <Badge className="bg-accent/20 text-accent border-0 uppercase tracking-widest text-[10px] font-bold">
+            Compromiso de Marca Lumina
+          </Badge>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+            Transparencia y Excelencia en Cada Entrega
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Diseñamos y distribuimos directamente para ofrecerte la máxima confianza y durabilidad.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {guarantees.map((g) => (
+            <div
+              key={g.title}
+              className="glass-subtle rounded-2xl p-5 border border-white/60 space-y-3"
+            >
+              <div className={`w-10 h-10 rounded-xl grid place-items-center ${g.hue}`}>
+                <g.icon className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-base">{g.title}</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">{g.desc}</p>
+            </div>
+          ))}
+        </div>
+      </GlassCard>
+    </section>
+  );
+}
+
+function VIPClubBanner() {
+  return (
+    <section className="mx-3 md:mx-6 mt-10">
+      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-violet-900 via-indigo-900 to-black text-white p-8 md:p-12 shadow-2xl border border-white/20">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(180,100,240,0.3),transparent_50%)] pointer-events-none" />
+        <div className="relative z-10 grid lg:grid-cols-12 gap-8 items-center">
+          <div className="lg:col-span-8 space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-semibold tracking-wider uppercase text-accent-foreground border border-white/20">
+              <Sparkles className="w-3.5 h-3.5 text-accent" />
+              Club Exclusivo Lumina VIP
+            </div>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
+              Recibe un{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent via-fuchsia-300 to-amber-200">
+                -10% DTO Adicional
+              </span>{" "}
+              <br className="hidden sm:inline" />
+              en tu primera compra directa
+            </h2>
+            <p className="text-sm md:text-base text-white/80 max-w-xl font-light leading-relaxed">
+              Únete a nuestra comunidad oficial y disfruta de beneficios exclusivos: acceso
+              anticipado a colecciones de edición limitada, ofertas secretas y soporte prioritario.
+            </p>
+          </div>
+          <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3 justify-center">
+            <Button
+              size="lg"
+              asChild
+              className="rounded-full h-13 px-8 bg-white text-black hover:bg-white/90 font-bold text-sm tracking-wide shadow-glow transition hover:scale-105 cursor-pointer"
+            >
+              <Link to="/tienda">
+                Comprar con Descuento VIP
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Link>
+            </Button>
+            <p className="text-[11px] text-white/60 text-center">
+              Descuento aplicable automáticamente en tu carrito
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function ScrollProgress() {
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -719,16 +1232,23 @@ function Home() {
     <ShopProvider>
       <main className="min-h-screen relative overflow-x-hidden pb-28 lg:pb-0">
         <ScrollProgress />
+        <TopConversionBar />
         <div className="fixed inset-0 -z-10 aurora-bg opacity-40 pointer-events-none" />
         <Navbar />
         <Hero />
+        <FlashSaleDeals />
         <Categories />
+        <OfficialStoreBenefitsSection />
         <BestSellers />
+        <CustomerReviewsSection />
         <Products />
+        <OfficialStoreGuarantees />
+        <VIPClubBanner />
         <WhyUs />
         <Recent />
         <About />
         <Footer />
+        <SalesNotificationTicker />
         <ThumbNav />
         <CartSheet />
         <ShoppingAssistant />

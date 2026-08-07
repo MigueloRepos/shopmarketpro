@@ -6,7 +6,83 @@ export type Product = {
   reviews?: number;
   category?: string;
   image?: string;
+  seller?: string;
+  sellerVerified?: boolean;
 };
+
+export interface Vendor {
+  id: string;
+  name: string;
+  logo: string;
+  rating: number;
+  reviews: number;
+  productsCount: number;
+  badge: string;
+  category: string;
+  description: string;
+}
+
+export const featuredVendors: Vendor[] = [
+  {
+    id: "lumina-official",
+    name: "Lumina Official Store",
+    logo: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&auto=format&fit=crop&q=80",
+    rating: 4.9,
+    reviews: 4820,
+    productsCount: 154,
+    badge: "Tienda Oficial",
+    category: "Audio & Tecnología",
+    description: "Diseño minimalista y tecnología acústica premium directa del fabricante.",
+  },
+  {
+    id: "soundmaster-co",
+    name: "SoundMaster Studio",
+    logo: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=150&auto=format&fit=crop&q=80",
+    rating: 4.8,
+    reviews: 1940,
+    productsCount: 86,
+    badge: "Top Vendedor",
+    category: "Audio Pro",
+    description:
+      "Especialistas en cancelación de ruido, audio Hi-Fi y equipos de sonido profesional.",
+  },
+  {
+    id: "techworld-global",
+    name: "TechWorld Global",
+    logo: "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=150&auto=format&fit=crop&q=80",
+    rating: 4.7,
+    reviews: 3210,
+    productsCount: 230,
+    badge: "Verificado",
+    category: "Gadgets & Móviles",
+    description:
+      "Gadgets inteligentes, accesorios de carga rápida y componentes de última generación.",
+  },
+  {
+    id: "modastyle-hub",
+    name: "ModaStyle & Travel",
+    logo: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=150&auto=format&fit=crop&q=80",
+    rating: 4.9,
+    reviews: 1120,
+    productsCount: 64,
+    badge: "Envío Exprés",
+    category: "Calzado & Mochilas",
+    description:
+      "Colecciones exclusivas de calzado casual, mochilas ergonómicas y accesorios de viaje.",
+  },
+  {
+    id: "home-living-direct",
+    name: "Home & Living Direct",
+    logo: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=150&auto=format&fit=crop&q=80",
+    rating: 4.8,
+    reviews: 870,
+    productsCount: 112,
+    badge: "Verificado",
+    category: "Hogar & Iluminación",
+    description:
+      "Iluminación domótica, pequeños electrodomésticos y organización inteligente para tu hogar.",
+  },
+];
 
 export const categories = [
   "Tecnología",
@@ -15,6 +91,8 @@ export const categories = [
   "Accesorios",
   "Deporte",
   "Belleza",
+  "Calzado",
+  "Bebidas",
 ] as const;
 
 export const bestSellers: Product[] = [
@@ -25,6 +103,8 @@ export const bestSellers: Product[] = [
     rating: 4.9,
     reviews: 1240,
     category: "Audio",
+    seller: "Lumina Official Store",
+    sellerVerified: true,
   },
   {
     name: "Smartwatch Series 9",
@@ -33,6 +113,8 @@ export const bestSellers: Product[] = [
     rating: 4.8,
     reviews: 890,
     category: "Accesorios",
+    seller: "TechWorld Global",
+    sellerVerified: true,
   },
   {
     name: "Altavoz Inalámbrico",
@@ -41,6 +123,8 @@ export const bestSellers: Product[] = [
     rating: 4.9,
     reviews: 654,
     category: "Audio",
+    seller: "SoundMaster Studio",
+    sellerVerified: true,
   },
   {
     name: "Mochila Minimal 2.0",
@@ -49,6 +133,8 @@ export const bestSellers: Product[] = [
     rating: 4.7,
     reviews: 432,
     category: "Accesorios",
+    seller: "ModaStyle & Travel",
+    sellerVerified: true,
   },
   {
     name: "Cámara Mini 4K",
@@ -57,28 +143,120 @@ export const bestSellers: Product[] = [
     rating: 4.8,
     reviews: 1120,
     category: "Tecnología",
+    seller: "TechWorld Global",
+    sellerVerified: true,
   },
 ];
 
 export const products: Product[] = [
-  { name: "Lámpara LED Inteligente", price: 49.99, category: "Hogar" },
-  { name: "Teclado Mecánico Pro", price: 99.99, category: "Tecnología" },
-  { name: "Mouse Inalámbrico Ergonómico", price: 39.99, category: "Tecnología" },
-  { name: "Cargador 3 en 1 MagSafe", price: 59.99, category: "Accesorios" },
-  { name: "Botella Térmica 500ml", price: 29.99, category: "Deporte" },
-  { name: "Soporte Ajustable Laptop", price: 34.99, category: "Tecnología" },
-  { name: "Power Bank 20K Ultra", price: 49.99, category: "Tecnología" },
-  { name: "Cable USB-C a C 100W", price: 19.99, category: "Accesorios" },
-  { name: "Auriculares On-Ear Lite", price: 59.99, category: "Audio" },
-  { name: "Organizador de Cables", price: 14.99, category: "Hogar" },
+  {
+    name: "Lámpara LED Inteligente",
+    price: 49.99,
+    category: "Hogar",
+    seller: "Home & Living Direct",
+    sellerVerified: true,
+  },
+  {
+    name: "Teclado Mecánico Pro",
+    price: 99.99,
+    category: "Tecnología",
+    seller: "TechWorld Global",
+    sellerVerified: true,
+  },
+  {
+    name: "Mouse Inalámbrico Ergonómico",
+    price: 39.99,
+    category: "Tecnología",
+    seller: "TechWorld Global",
+    sellerVerified: true,
+  },
+  {
+    name: "Cargador 3 en 1 MagSafe",
+    price: 59.99,
+    category: "Accesorios",
+    seller: "Lumina Official Store",
+    sellerVerified: true,
+  },
+  {
+    name: "Botella Térmica 500ml",
+    price: 29.99,
+    category: "Deporte",
+    seller: "ModaStyle & Travel",
+    sellerVerified: true,
+  },
+  {
+    name: "Soporte Ajustable Laptop",
+    price: 34.99,
+    category: "Tecnología",
+    seller: "TechWorld Global",
+    sellerVerified: true,
+  },
+  {
+    name: "Power Bank 20K Ultra",
+    price: 49.99,
+    category: "Tecnología",
+    seller: "TechWorld Global",
+    sellerVerified: true,
+  },
+  {
+    name: "Cable USB-C a C 100W",
+    price: 19.99,
+    category: "Accesorios",
+    seller: "Lumina Official Store",
+    sellerVerified: true,
+  },
+  {
+    name: "Auriculares On-Ear Lite",
+    price: 59.99,
+    category: "Audio",
+    seller: "SoundMaster Studio",
+    sellerVerified: true,
+  },
+  {
+    name: "Organizador de Cables",
+    price: 14.99,
+    category: "Hogar",
+    seller: "Home & Living Direct",
+    sellerVerified: true,
+  },
 ];
 
 export const recent: Product[] = [
-  { name: "Drone Mini 2", price: 299.99, category: "Tecnología" },
-  { name: "Proyector Portátil", price: 189.99, category: "Tecnología" },
-  { name: "Hub USB-C 7 en 1", price: 49.99, category: "Tecnología" },
-  { name: "Luz RGB Inteligente", price: 24.99, category: "Hogar" },
-  { name: 'Monitor Portátil 15.6"', price: 159.99, category: "Tecnología" },
+  {
+    name: "Drone Mini 2",
+    price: 299.99,
+    category: "Tecnología",
+    seller: "TechWorld Global",
+    sellerVerified: true,
+  },
+  {
+    name: "Proyector Portátil",
+    price: 189.99,
+    category: "Tecnología",
+    seller: "Lumina Official Store",
+    sellerVerified: true,
+  },
+  {
+    name: "Hub USB-C 7 en 1",
+    price: 49.99,
+    category: "Tecnología",
+    seller: "TechWorld Global",
+    sellerVerified: true,
+  },
+  {
+    name: "Luz RGB Inteligente",
+    price: 24.99,
+    category: "Hogar",
+    seller: "Home & Living Direct",
+    sellerVerified: true,
+  },
+  {
+    name: 'Monitor Portátil 15.6"',
+    price: 159.99,
+    category: "Tecnología",
+    seller: "TechWorld Global",
+    sellerVerified: true,
+  },
 ];
 
 export const allProducts: Product[] = [...bestSellers, ...products, ...recent];

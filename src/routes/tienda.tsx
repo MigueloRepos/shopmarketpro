@@ -18,12 +18,14 @@ import {
   Send,
   Sliders,
   Check,
+  Store,
+  CheckCircle2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useShop } from "@/lib/cart";
-import { ProductCard, productCardVariants } from "@/components/ProductCard";
+import { ProductCard, productCardVariants, ProductCardSkeleton } from "@/components/ProductCard";
 import { CartSheet } from "@/components/CartSheet";
 import { ThumbNav } from "@/components/ThumbNav";
 import { ShoppingAssistant } from "@/components/ShoppingAssistant";
@@ -32,6 +34,11 @@ import { toast } from "sonner";
 import { csvProducts, allProducts } from "@/lib/catalog";
 
 export const Route = createFileRoute("/tienda")({
+  validateSearch: (search: Record<string, unknown>) => {
+    return {
+      vendor: (search.vendor as string) || "",
+    };
+  },
   component: StorePage,
 });
 
@@ -269,10 +276,19 @@ function StorePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todos");
   const [sortBy, setSortBy] = useState("default");
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Load all products: merge standard catalog with imported CSV catalog
+  // Simula un retardo de carga al cambiar filtros
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [selectedCategory, searchQuery, sortBy]);
+
+  // Load all products
   const productsList = useMemo(() => {
-    // Unique list by name to avoid visual duplicates
     const seen = new Set<string>();
     const merged = [...csvProducts, ...allProducts];
     return merged.filter((item) => {
@@ -282,7 +298,7 @@ function StorePage() {
     });
   }, []);
 
-  // Compute unique categories dynamically
+  // Compute unique categories
   const categoriesList = useMemo(() => {
     const categories = new Set<string>();
     productsList.forEach((p) => {
@@ -337,14 +353,15 @@ function StorePage() {
           <div className="relative max-w-2xl space-y-4">
             <div className="inline-flex items-center gap-2 glass px-3 py-1.5 rounded-full text-xs font-semibold text-accent border border-white/60">
               <Sparkles className="w-3.5 h-3.5" />
-              Catálogo Completo
+              Tienda Oficial Lumina • Envíos Directos 24h
             </div>
             <h1 className="font-display text-4xl sm:text-5xl font-normal tracking-tight">
-              Explora nuestra <span className="italic font-light text-gradient">Colección.</span>
+              Catálogo Oficial de{" "}
+              <span className="italic font-light text-gradient">Productos Exclusivos</span>
             </h1>
             <p className="text-muted-foreground text-sm sm:text-base leading-relaxed max-w-lg">
-              Descubre productos excepcionales con entrega inmediata y soporte personalizado. Añade
-              artículos al carrito y haz tu pedido directamente por WhatsApp.
+              Explora nuestra colección oficial. Todos los productos cuentan con garantía directa de
+              fábrica de 3 años, empaque protegido y entrega prioritaria.
             </p>
           </div>
         </GlassCard>
@@ -359,7 +376,7 @@ function StorePage() {
               <div className="flex items-center justify-between pb-3 border-b border-white/20">
                 <span className="font-semibold text-sm flex items-center gap-2">
                   <SlidersHorizontal className="w-4 h-4 text-accent" />
-                  Filtros
+                  Filtros de Búsqueda
                 </span>
                 {(selectedCategory !== "Todos" || searchQuery !== "" || sortBy !== "default") && (
                   <button
@@ -369,7 +386,7 @@ function StorePage() {
                       setSortBy("default");
                       toast.info("Filtros restablecidos");
                     }}
-                    className="text-xs text-accent hover:underline"
+                    className="text-xs text-accent hover:underline cursor-pointer"
                   >
                     Limpiar
                   </button>
@@ -379,12 +396,12 @@ function StorePage() {
               {/* Search input inside filters block */}
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Buscar
+                  Buscar Producto
                 </label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    placeholder="¿Qué estás buscando?..."
+                    placeholder="Escribe el nombre..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-9 rounded-xl bg-white/60 border-white/60 text-sm h-10"
@@ -414,7 +431,7 @@ function StorePage() {
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
                   Categorías
                 </label>
-                <div className="flex flex-col gap-1 max-h-[250px] overflow-y-auto pr-1 scrollbar-thin">
+                <div className="flex flex-col gap-1 max-h-[260px] overflow-y-auto pr-1 scrollbar-thin">
                   {categoriesList.map((cat) => {
                     const isSelected = selectedCategory === cat;
                     return (
@@ -439,18 +456,32 @@ function StorePage() {
 
           {/* Products Grid */}
           <div className="lg:col-span-9 space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-xs text-muted-foreground font-medium">
-                Mostrando {filteredProducts.length} de {productsList.length} productos
+                Mostrando {filteredProducts.length} de {productsList.length} productos oficiales
               </span>
-              {selectedCategory !== "Todos" && (
-                <Badge className="bg-accent/20 hover:bg-accent/20 text-accent border border-accent/30 rounded-full text-[10px]">
-                  {selectedCategory}
-                </Badge>
-              )}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {selectedCategory !== "Todos" && (
+                  <Badge className="bg-foreground text-background border-0 rounded-full text-[10px] flex items-center gap-1">
+                    Categoría: {selectedCategory}
+                    <button
+                      onClick={() => setSelectedCategory("Todos")}
+                      className="ml-1 hover:opacity-80 font-bold"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                )}
+              </div>
             </div>
 
-            {filteredProducts.length === 0 ? (
+            {isLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <ProductCardSkeleton key={i} compact />
+                ))}
+              </div>
+            ) : filteredProducts.length === 0 ? (
               <GlassCard className="p-16 text-center space-y-4">
                 <div className="w-16 h-16 rounded-full bg-secondary/30 grid place-items-center mx-auto">
                   <Search className="w-8 h-8 text-muted-foreground" />

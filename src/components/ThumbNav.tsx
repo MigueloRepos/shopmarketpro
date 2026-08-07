@@ -15,14 +15,6 @@ export function ThumbNav() {
     >
       <div className="glass-strong rounded-[1.75rem] flex items-center gap-1 px-2 py-1.5 shadow-glow">
         <Link
-          to="/tienda"
-          className={item}
-          activeProps={{ className: "text-accent font-semibold" }}
-        >
-          <Store className="w-5 h-5" />
-          Tienda
-        </Link>
-        <Link
           to="/"
           className={item}
           activeProps={{ className: "text-accent font-semibold" }}
@@ -30,6 +22,14 @@ export function ThumbNav() {
         >
           <Home className="w-5 h-5" />
           Inicio
+        </Link>
+        <Link
+          to="/tienda"
+          className={item}
+          activeProps={{ className: "text-accent font-semibold" }}
+        >
+          <Store className="w-5 h-5" />
+          Tienda
         </Link>
 
         <button
