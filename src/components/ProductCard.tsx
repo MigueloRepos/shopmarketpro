@@ -74,6 +74,7 @@ export interface ProductCardProps {
   image?: string;
   seller?: string;
   sellerVerified?: boolean;
+  stock?: number;
 }
 
 export const productCardVariants = {
@@ -102,6 +103,7 @@ export function ProductCard({
   image,
   seller,
   sellerVerified = true,
+  stock,
 }: ProductCardProps) {
   const { add, setCartOpen } = useShop();
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -116,6 +118,14 @@ export function ProductCard({
   }, []);
 
   const discount = old ? Math.round(((old - price) / old) * 100) : 0;
+
+  // Generate deterministic low stock (2-5) for some items to show the US low-stock label
+  const displayStock =
+    stock !== undefined
+      ? stock
+      : name.charCodeAt(0) % 3 === 0
+        ? (name.charCodeAt(1) % 4) + 2
+        : undefined;
 
   // Use custom image if provided, fall back to known Unsplash mock images, or a general default.
   const imageUrl =
@@ -264,43 +274,71 @@ export function ProductCard({
             </div>
           )}
         </div>
-        <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/30 gap-1">
-          <div className="flex flex-col">
-            <div className="flex items-baseline gap-1.5">
-              <span className="font-bold text-base text-foreground">{fmt(price)}</span>
-              {old && (
-                <span className="text-xs text-muted-foreground line-through">{fmt(old)}</span>
+
+        <div className="mt-4 pt-3 border-t border-black/5 dark:border-white/5 space-y-3.5">
+          {/* Price & Stock/Delivery Row */}
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider leading-none mb-1">
+                Precio Especial
+              </span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="font-black text-lg text-foreground tracking-tight">
+                  {fmt(price)}
+                </span>
+                {old && (
+                  <span className="text-xs text-muted-foreground line-through font-medium">
+                    {fmt(old)}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="text-right">
+              {displayStock !== undefined && displayStock > 0 && displayStock <= 5 ? (
+                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/15 text-rose-600 dark:text-rose-400 font-bold text-[9px] animate-pulse-soft">
+                  <span className="relative flex h-1 w-1 shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-1 w-1 bg-rose-600 dark:bg-rose-400"></span>
+                  </span>
+                  ¡Solo {displayStock} left!
+                </div>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[9px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/15 px-2 py-0.5 rounded-full">
+                  <Zap className="w-2.5 h-2.5 fill-current text-emerald-500" /> Envío 24h
+                </span>
               )}
             </div>
-            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-0.5">
-              Envío 24h Disponibilidad Inmediata
-            </span>
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
+          {/* Action Buttons Grid */}
+          <div className="flex gap-2 w-full">
             <button
               onClick={() => {
-                add({ name, price });
+                add({ name, price, image: imageUrl });
                 setCartOpen(true);
-                toast.success(`Pedir ahora: ${name}`);
+                toast.success(`Iniciando pedido para: ${name}`);
               }}
-              className="relative group/btn px-3.5 py-1.5 rounded-full bg-accent text-accent-foreground font-black text-xs animate-pulse-soft hover-glow-accent shadow-md cursor-pointer whitespace-nowrap flex items-center gap-1 overflow-hidden transition-all duration-300"
+              className="flex-1 relative group/btn h-10 rounded-xl bg-accent text-accent-foreground font-black text-xs hover-glow-accent shadow-md cursor-pointer flex items-center justify-center gap-1.5 overflow-hidden transition-all duration-300 border border-accent/20 tracking-wider uppercase"
             >
-              <span className="relative z-10 flex items-center gap-1">
+              <span className="relative z-10 flex items-center justify-center gap-1.5">
+                <Zap className="w-3.5 h-3.5 text-accent-foreground fill-current animate-pulse-soft" />
                 PEDIR AHORA
-                <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-0.5" />
+                <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:translate-x-1" />
               </span>
               <span className="absolute inset-0 bg-gradient-to-r from-accent via-fuchsia-500 to-amber-500 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />
             </button>
+
             <button
               onClick={() => {
-                add({ name, price });
+                add({ name, price, image: imageUrl });
                 toast.success(`${name} añadido al carrito`);
               }}
               aria-label="Añadir al carrito"
-              className="w-8 h-8 rounded-full bg-foreground text-background grid place-items-center hover:scale-110 transition cursor-pointer shrink-0"
+              className="w-10 h-10 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-foreground border border-black/10 dark:border-white/10 grid place-items-center hover:scale-102 active:scale-98 transition cursor-pointer shrink-0"
+              title="Añadir al carrito"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 font-bold" />
             </button>
           </div>
         </div>
