@@ -61,7 +61,18 @@ function CopyField({ label, value }: { label: string; value: string }) {
 }
 
 export function CartSheet() {
-  const { items, total, count, add, setQty, remove, clear, cartOpen, setCartOpen } = useShop();
+  const {
+    items,
+    total,
+    count,
+    add,
+    setQty,
+    remove,
+    clear,
+    cartOpen,
+    setCartOpen,
+    setPaymentInstructionsOpen,
+  } = useShop();
   const [step, setStep] = useState<"cart" | "zelle">("cart");
   const [coupon, setCoupon] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
@@ -345,7 +356,7 @@ ${appliedCoupon ? `🏷️ *Descuento Aplicado (${appliedCoupon}):* -${fmt(disco
             </div>
 
             {/* Action Buttons */}
-            <div className="grid grid-cols-1 gap-2.5 pt-1">
+            <div className="grid grid-cols-1 gap-2 pt-1">
               <Button
                 className="w-full rounded-full h-12 bg-accent text-accent-foreground hover:bg-accent/90 font-black text-sm flex items-center justify-center gap-2 cursor-pointer shadow-glow animate-pulse-soft hover-glow-accent tracking-wide uppercase transition-all duration-300"
                 disabled={items.length === 0}
@@ -353,6 +364,13 @@ ${appliedCoupon ? `🏷️ *Descuento Aplicado (${appliedCoupon}):* -${fmt(disco
               >
                 PEDIR AHORA • Pagar con Zelle <ArrowRight className="w-4 h-4" />
               </Button>
+              <button
+                type="button"
+                onClick={() => setPaymentInstructionsOpen(true)}
+                className="text-xs font-semibold text-accent hover:underline flex items-center justify-center gap-1.5 py-1 cursor-pointer"
+              >
+                ℹ️ ¿Cómo funciona el pago con Zelle? Ver instrucciones
+              </button>
             </div>
 
             {/* Security Seals */}
@@ -383,6 +401,7 @@ function ZelleCheckout({
   onDone: () => void;
 }) {
   const [sending, setSending] = useState(false);
+  const { setPaymentInstructionsOpen } = useShop();
   return (
     <form
       className="space-y-4 pb-6"
@@ -398,6 +417,21 @@ function ZelleCheckout({
         }, 900);
       }}
     >
+      <div className="flex items-center justify-between gap-2 p-2 rounded-xl bg-accent/5 border border-accent/20">
+        <span className="text-[11px] text-muted-foreground font-semibold pl-1.5">
+          🇺🇸 Pago exclusivo EE.UU.
+        </span>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setPaymentInstructionsOpen(true)}
+          className="rounded-full text-[10px] h-7 px-3 border-accent/30 text-accent hover:bg-accent/10 cursor-pointer font-bold"
+        >
+          Ver instrucciones de pago ℹ️
+        </Button>
+      </div>
+
       <div className="glass rounded-2xl p-4 text-center">
         <div className="text-xs text-muted-foreground">Monto a transferir</div>
         <div className="text-3xl font-black tracking-tight">{fmt(total)}</div>

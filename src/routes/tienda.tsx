@@ -80,7 +80,7 @@ function ScrollProgress() {
 }
 
 function Navbar() {
-  const { count, setCartOpen, setAssistantOpen } = useShop();
+  const { count, setCartOpen, setAssistantOpen, setPaymentInstructionsOpen } = useShop();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -142,6 +142,12 @@ function Navbar() {
           >
             Contacto
           </a>
+          <button
+            onClick={() => setPaymentInstructionsOpen(true)}
+            className="px-3 py-1.5 rounded-full transition-all duration-300 hover:bg-white/60 font-semibold text-accent cursor-pointer text-sm"
+          >
+            Cómo Pagar
+          </button>
         </div>
 
         <div className="flex items-center gap-1 ml-auto">
@@ -183,6 +189,7 @@ function Navbar() {
 }
 
 function Footer() {
+  const { setPaymentInstructionsOpen } = useShop();
   return (
     <footer className="mx-3 md:mx-6 mt-12 mb-6 scroll-mt-24">
       <GlassCard className="p-6 md:p-10">
@@ -261,11 +268,19 @@ function Footer() {
         </div>
         <div className="mt-8 pt-6 border-t border-white/50 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
           <span>© 2026 Lumina. Todos los derechos reservados.</span>
-          <div className="flex items-center gap-2 opacity-80 font-semibold">
-            <span className="glass-subtle rounded px-3 py-1 text-foreground">
-              Pago único vía Zelle
-            </span>
-            <span className="glass-subtle rounded px-2 py-1">pagos@lumina.store</span>
+          <div className="flex items-center gap-2 font-semibold">
+            <button
+              onClick={() => setPaymentInstructionsOpen(true)}
+              className="glass-subtle rounded px-3 py-1 text-foreground hover:bg-accent/15 hover:text-accent transition duration-200 cursor-pointer text-xs flex items-center gap-1 font-semibold"
+            >
+              Pago único vía Zelle ℹ️
+            </button>
+            <button
+              onClick={() => setPaymentInstructionsOpen(true)}
+              className="glass-subtle rounded px-2 py-1 text-muted-foreground hover:bg-accent/15 hover:text-accent transition duration-200 cursor-pointer text-xs font-semibold"
+            >
+              pagos@lumina.store
+            </button>
           </div>
         </div>
       </GlassCard>

@@ -20,7 +20,7 @@ import { useShop } from "@/lib/cart";
 import { toast } from "sonner";
 import { fmt } from "@/lib/catalog";
 
-const productImages: Record<string, string> = {
+export const productImages: Record<string, string> = {
   "Auriculares Pro X":
     "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=80",
   "Smartwatch Series 9":

@@ -14,6 +14,8 @@ type ShopContextValue = {
   setCartOpen: (v: boolean) => void;
   assistantOpen: boolean;
   setAssistantOpen: (v: boolean) => void;
+  paymentInstructionsOpen: boolean;
+  setPaymentInstructionsOpen: (v: boolean) => void;
 };
 
 const ShopContext = createContext<ShopContextValue | null>(null);
@@ -23,6 +25,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [assistantOpen, setAssistantOpen] = useState(false);
+  const [paymentInstructionsOpen, setPaymentInstructionsOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -76,8 +79,10 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       setCartOpen,
       assistantOpen,
       setAssistantOpen,
+      paymentInstructionsOpen,
+      setPaymentInstructionsOpen,
     }),
-    [items, add, remove, setQty, clear, cartOpen, assistantOpen],
+    [items, add, remove, setQty, clear, cartOpen, assistantOpen, paymentInstructionsOpen],
   );
 
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>;

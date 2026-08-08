@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { motion, useScroll, useSpring } from "framer-motion";
-import { useState, useEffect } from "react";
+import { motion, useScroll, useSpring, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   Search,
   User,
@@ -50,7 +50,12 @@ import { ShopProvider, useShop } from "@/lib/cart";
 import { CartSheet } from "@/components/CartSheet";
 import { ThumbNav } from "@/components/ThumbNav";
 import { ShoppingAssistant } from "@/components/ShoppingAssistant";
-import { ProductCard, productCardVariants, ProductCardSkeleton } from "@/components/ProductCard";
+import {
+  ProductCard,
+  productCardVariants,
+  ProductCardSkeleton,
+  productImages,
+} from "@/components/ProductCard";
 import { TopConversionBar } from "@/components/TopConversionBar";
 import { SalesNotificationTicker } from "@/components/SalesNotificationTicker";
 import heroImg from "@/assets/hero-headphones.jpg";
@@ -143,9 +148,11 @@ function GlassCard({
 
 /* ------------------------------ Sections ------------------------------ */
 function Navbar() {
-  const { count, setCartOpen, setAssistantOpen } = useShop();
+  const { count, setCartOpen, setAssistantOpen, add, setPaymentInstructionsOpen } = useShop();
   const [scrolled, setScrolled] = useState(false);
   const [searchVal, setSearchVal] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -156,11 +163,43 @@ function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setIsFocused(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsFocused(false);
+      }
+    };
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, []);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && searchVal.trim()) {
       navigate({ to: "/tienda", search: { q: searchVal.trim() } });
+      setIsFocused(false);
     }
   };
+
+  const filteredQuickProducts = useMemo(() => {
+    if (!searchVal.trim()) return [];
+    const q = searchVal.toLowerCase();
+    return allProducts
+      .filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) || (p.category && p.category.toLowerCase().includes(q)),
+      )
+      .slice(0, 5);
+  }, [searchVal]);
 
   return (
     <motion.nav
@@ -217,21 +256,195 @@ function Navbar() {
           >
             Contacto
           </a>
+          <button
+            onClick={() => setPaymentInstructionsOpen(true)}
+            className="px-3 py-1.5 rounded-full transition-all duration-300 hover:bg-white/60 font-semibold text-accent cursor-pointer text-sm"
+          >
+            Cómo Pagar
+          </button>
         </div>
 
-        <div className="hidden md:flex items-center flex-1 max-w-xs ml-auto">
+        <div
+          className="hidden md:flex items-center flex-1 max-w-xs ml-auto"
+          ref={searchContainerRef}
+        >
           <div className="relative w-full group">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors duration-300 group-focus-within:text-accent" />
             <Input
               type="text"
               value={searchVal}
-              onChange={(e) => setSearchVal(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onChange={(e) => {
+                setSearchVal(e.target.value);
+                setIsFocused(true);
+              }}
               onKeyDown={handleKeyDown}
               placeholder="Buscar en la tienda oficial..."
               className={`pl-10 pr-4 rounded-full bg-white/40 dark:bg-black/30 border border-white/20 dark:border-white/10 focus-visible:ring-2 focus-visible:ring-accent focus-visible:border-transparent transition-all duration-300 placeholder:text-muted-foreground/70 ${
                 scrolled ? "h-8 text-xs" : "h-9 text-sm"
               }`}
             />
+
+            <AnimatePresence>
+              {isFocused && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  className="absolute top-full left-0 right-0 mt-2 p-3 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md rounded-2xl border border-black/10 dark:border-white/10 shadow-2xl z-50 overflow-hidden flex flex-col gap-2.5 max-h-[380px] w-80 md:w-96 right-0 md:left-auto"
+                >
+                  {/* Empty state: popular suggestions & recommended */}
+                  {!searchVal.trim() ? (
+                    <div className="space-y-3">
+                      <div>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2 mb-1.5 block">
+                          Búsquedas populares
+                        </span>
+                        <div className="flex flex-wrap gap-1.5 px-2">
+                          {["Auriculares", "Reloj", "Proyector", "Altavoz"].map((term) => (
+                            <button
+                              key={term}
+                              type="button"
+                              onClick={() => {
+                                setSearchVal(term);
+                                setIsFocused(true);
+                              }}
+                              className="text-[11px] px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/5 hover:bg-accent/15 hover:text-accent border border-black/5 dark:border-white/5 transition-colors duration-200 text-foreground cursor-pointer font-semibold"
+                            >
+                              {term}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="border-t border-black/5 dark:border-white/5 pt-2.5">
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2 mb-1.5 block">
+                          Productos Recomendados
+                        </span>
+                        <div className="flex flex-col gap-1">
+                          {allProducts.slice(0, 3).map((p) => {
+                            const img =
+                              p.image ||
+                              productImages[p.name] ||
+                              "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=150&auto=format&fit=crop&q=80";
+                            return (
+                              <div
+                                key={p.name}
+                                onClick={() => {
+                                  navigate({ to: "/tienda", search: { q: p.name } });
+                                  setIsFocused(false);
+                                }}
+                                className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer group/item"
+                              >
+                                <div className="w-9 h-9 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-black/5 dark:border-white/5">
+                                  <img
+                                    src={img}
+                                    alt={p.name}
+                                    className="w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-300"
+                                  />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <span className="font-semibold text-[11px] text-foreground truncate block text-left">
+                                    {p.name}
+                                  </span>
+                                  <span className="text-[9px] text-muted-foreground block font-medium text-left">
+                                    {p.category || "Electrónica"}
+                                  </span>
+                                </div>
+                                <span className="text-[11px] font-bold text-accent whitespace-nowrap mr-1">
+                                  {fmt(p.price)}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Search results state */
+                    <div className="space-y-2">
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2 block mb-1">
+                        Resultados encontrados
+                      </span>
+                      {filteredQuickProducts.length === 0 ? (
+                        <div className="text-center py-6 px-4">
+                          <p className="text-xs text-muted-foreground font-medium">
+                            No se encontraron productos para{" "}
+                            <strong className="text-foreground">"{searchVal}"</strong>
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-1 max-h-[260px] overflow-y-auto pr-0.5">
+                          {filteredQuickProducts.map((p) => {
+                            const img =
+                              p.image ||
+                              productImages[p.name] ||
+                              "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=150&auto=format&fit=crop&q=80";
+                            return (
+                              <div
+                                key={p.name}
+                                onClick={() => {
+                                  navigate({ to: "/tienda", search: { q: p.name } });
+                                  setIsFocused(false);
+                                }}
+                                className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer group/item text-left"
+                              >
+                                <div className="w-9 h-9 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-black/5 dark:border-white/5">
+                                  <img
+                                    src={img}
+                                    alt={p.name}
+                                    className="w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-300"
+                                  />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <span className="font-bold text-[11px] text-foreground truncate block text-left">
+                                    {p.name}
+                                  </span>
+                                  <span className="text-[9px] text-muted-foreground block font-semibold uppercase tracking-wider text-left">
+                                    {p.category}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[11px] font-black text-accent whitespace-nowrap">
+                                    {fmt(p.price)}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      add(p);
+                                      toast.success(`Añadido al carrito: ${p.name}`);
+                                    }}
+                                    className="p-1 rounded-full bg-accent/15 text-accent hover:bg-accent hover:text-accent-foreground transition-colors duration-200 cursor-pointer flex items-center justify-center"
+                                    title="Añadir al carrito"
+                                  >
+                                    <Plus className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      <div className="border-t border-black/5 dark:border-white/5 pt-2 mt-1 text-center">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigate({ to: "/tienda", search: { q: searchVal.trim() } });
+                            setIsFocused(false);
+                          }}
+                          className="text-[10px] font-bold text-accent hover:underline flex items-center justify-center gap-1 mx-auto cursor-pointer"
+                        >
+                          Ver todos los resultados <ArrowRight className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
         <div className="flex items-center gap-1.5 ml-auto md:ml-2">
@@ -928,6 +1141,7 @@ function About() {
 }
 
 function Footer() {
+  const { setPaymentInstructionsOpen } = useShop();
   return (
     <footer id="contacto" className="mx-3 md:mx-6 mt-6 mb-6 scroll-mt-24">
       <GlassCard className="p-6 md:p-10">
@@ -1012,11 +1226,19 @@ function Footer() {
         </div>
         <div className="mt-8 pt-6 border-t border-white/50 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
           <span>© 2026 Lumina. Todos los derechos reservados.</span>
-          <div className="flex items-center gap-2 opacity-80 font-semibold">
-            <span className="glass-subtle rounded px-3 py-1 text-foreground">
-              Pago único vía Zelle
-            </span>
-            <span className="glass-subtle rounded px-2 py-1">pagos@lumina.store</span>
+          <div className="flex items-center gap-2 font-semibold">
+            <button
+              onClick={() => setPaymentInstructionsOpen(true)}
+              className="glass-subtle rounded px-3 py-1 text-foreground hover:bg-accent/15 hover:text-accent transition duration-200 cursor-pointer text-xs flex items-center gap-1 font-semibold"
+            >
+              Pago único vía Zelle ℹ️
+            </button>
+            <button
+              onClick={() => setPaymentInstructionsOpen(true)}
+              className="glass-subtle rounded px-2 py-1 text-muted-foreground hover:bg-accent/15 hover:text-accent transition duration-200 cursor-pointer text-xs font-semibold"
+            >
+              pagos@lumina.store
+            </button>
           </div>
         </div>
       </GlassCard>
