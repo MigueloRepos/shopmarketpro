@@ -127,7 +127,9 @@ export function ShoppingAssistant() {
               )}
 
               {messages.map((m) => {
-                const text = m.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
+                const text = m.parts
+                  ? m.parts.map((p) => (p.type === "text" ? p.text : "")).join("")
+                  : (m as { content?: string }).content || "";
                 return (
                   <Message key={m.id} from={m.role}>
                     <MessageContent>

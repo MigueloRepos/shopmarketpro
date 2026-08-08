@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   ArrowRight,
   Zap,
+  Sparkles,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";

@@ -90,11 +90,13 @@ export const ConversationScrollButton = ({
   );
 };
 
-const getMessageText = (message: UIMessage): string =>
-  message.parts
+const getMessageText = (message: UIMessage): string => {
+  if (!message.parts) return (message as { content?: string }).content || "";
+  return message.parts
     .filter((part) => part.type === "text")
     .map((part) => part.text)
     .join("");
+};
 
 export type ConversationDownloadProps = Omit<ComponentProps<typeof Button>, "onClick"> & {
   messages: UIMessage[];
