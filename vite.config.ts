@@ -13,6 +13,11 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
+    resolve: {
+      alias: {
+        env: "/src/env-mock.ts",
+      },
+    },
     optimizeDeps: {
       exclude: ["shiki", "vscode-oniguruma"],
     },
