@@ -49,7 +49,7 @@ export function TopConversionBar() {
 
           <div className="hidden lg:flex items-center gap-1 text-[11px] text-emerald-300 font-medium">
             <ShieldCheck className="w-3.5 h-3.5" />
-            Envío Gratis &gt; 60€
+            Envío Gratis &gt; $60
           </div>
 
           <button

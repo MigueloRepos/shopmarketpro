@@ -242,8 +242,8 @@ ${appliedCoupon ? `🏷️ *Descuento Aplicado (${appliedCoupon}):* -${fmt(disco
                         Cable USB-C Carga Rápida 100W
                       </p>
                       <p className="text-[11px] text-muted-foreground">
-                        Por solo <strong className="text-accent">7.99€</strong>{" "}
-                        <span className="line-through text-[10px]">14.99€</span>
+                        Por solo <strong className="text-accent">{fmt(7.99)}</strong>{" "}
+                        <span className="line-through text-[10px]">{fmt(14.99)}</span>
                       </p>
                     </div>
                     <Button
@@ -254,7 +254,7 @@ ${appliedCoupon ? `🏷️ *Descuento Aplicado (${appliedCoupon}):* -${fmt(disco
                       }}
                       className="rounded-full text-xs h-8 px-3 bg-amber-500 text-white hover:bg-amber-600 shrink-0 font-bold cursor-pointer"
                     >
-                      + Añadir 7.99€
+                      + Añadir {fmt(7.99)}
                     </Button>
                   </div>
                 )}
@@ -334,7 +334,7 @@ ${appliedCoupon ? `🏷️ *Descuento Aplicado (${appliedCoupon}):* -${fmt(disco
                       GRATIS
                     </strong>
                   ) : (
-                    "4.95€"
+                    fmt(4.95)
                   )}
                 </span>
               </div>
@@ -352,15 +352,6 @@ ${appliedCoupon ? `🏷️ *Descuento Aplicado (${appliedCoupon}):* -${fmt(disco
                 onClick={() => setStep("zelle")}
               >
                 PEDIR AHORA • Pagar con Zelle <ArrowRight className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full rounded-full h-12 border-emerald-500/50 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/25 font-extrabold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm hover-glow-accent transition-all duration-300"
-                disabled={items.length === 0}
-                onClick={handleWhatsAppOrder}
-              >
-                <MessageCircle className="w-4 h-4 text-emerald-500 fill-emerald-500/20" />
-                PEDIR AHORA por WhatsApp
               </Button>
             </div>
 

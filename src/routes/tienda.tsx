@@ -37,6 +37,7 @@ export const Route = createFileRoute("/tienda")({
   validateSearch: (search: Record<string, unknown>) => {
     return {
       vendor: (search.vendor as string) || "",
+      q: (search.q as string) || "",
     };
   },
   component: StorePage,
@@ -273,7 +274,8 @@ function Footer() {
 }
 
 function StorePage() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const { q } = Route.useSearch() as { q?: string };
+  const [searchQuery, setSearchQuery] = useState(q || "");
   const [selectedCategory, setSelectedCategory] = useState("Todos");
   const [sortBy, setSortBy] = useState("default");
   const [isLoading, setIsLoading] = useState(true);

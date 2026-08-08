@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { useState, useEffect } from "react";
 import {
@@ -145,6 +145,8 @@ function GlassCard({
 function Navbar() {
   const { count, setCartOpen, setAssistantOpen } = useShop();
   const [scrolled, setScrolled] = useState(false);
+  const [searchVal, setSearchVal] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -153,6 +155,12 @@ function Navbar() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && searchVal.trim()) {
+      navigate({ to: "/tienda", search: { q: searchVal.trim() } });
+    }
+  };
 
   return (
     <motion.nav
@@ -212,11 +220,15 @@ function Navbar() {
         </div>
 
         <div className="hidden md:flex items-center flex-1 max-w-xs ml-auto">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <div className="relative w-full group">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors duration-300 group-focus-within:text-accent" />
             <Input
+              type="text"
+              value={searchVal}
+              onChange={(e) => setSearchVal(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder="Buscar en la tienda oficial..."
-              className={`pl-9 rounded-full bg-white/60 border-white/60 transition-all duration-300 ${
+              className={`pl-10 pr-4 rounded-full bg-white/40 dark:bg-black/30 border border-white/20 dark:border-white/10 focus-visible:ring-2 focus-visible:ring-accent focus-visible:border-transparent transition-all duration-300 placeholder:text-muted-foreground/70 ${
                 scrolled ? "h-8 text-xs" : "h-9 text-sm"
               }`}
             />
@@ -709,17 +721,17 @@ function CustomerReviewsSection() {
   const reviews = [
     {
       name: "María Fernández",
-      city: "Madrid",
+      city: "Miami",
       rating: 5,
       date: "Hace 2 días",
       product: "Auriculares Wireless Lumina Pro",
-      text: "Llegaron en 24 horas exactas a Madrid. La calidad del sonido es fantástica y la atención por WhatsApp fue súper rápida.",
+      text: "Llegaron en 24 horas exactas a Miami. La calidad del sonido es fantástica y el pago por Zelle fue sumamente fácil y seguro.",
       avatar:
         "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
     },
     {
       name: "Alejandro Gómez",
-      city: "Barcelona",
+      city: "Nueva York",
       rating: 5,
       date: "Hace 3 días",
       product: "Reloj Inteligente Ultra AMOLED",
@@ -729,7 +741,7 @@ function CustomerReviewsSection() {
     },
     {
       name: "Carmen Ruiz",
-      city: "Valencia",
+      city: "Orlando",
       rating: 5,
       date: "Hace 5 días",
       product: "Proyector Portátil HD",
@@ -1038,7 +1050,7 @@ function OfficialStoreBenefitsSection() {
     {
       icon: Award,
       title: "Soporte VIP Directo 24/7",
-      desc: "Atención personalizada por WhatsApp y llamada telefónica directa con nuestro equipo de especialistas.",
+      desc: "Atención personalizada por chat interactivo, correo y llamada telefónica directa con nuestro equipo de especialistas.",
       badge: "Atención VIP",
       hue: "text-amber-500 bg-amber-500/10 border-amber-500/20",
     },
@@ -1120,7 +1132,7 @@ function OfficialStoreGuarantees() {
     {
       icon: Truck,
       title: "Seguimiento en Tiempo Real",
-      desc: "Recibe actualizaciones inmediatas por SMS y WhatsApp desde que tu pedido sale de nuestro almacén.",
+      desc: "Recibe actualizaciones inmediatas por SMS y correo electrónico desde que tu pedido sale de nuestro almacén.",
       hue: "text-blue-500 bg-blue-100/60",
     },
     {

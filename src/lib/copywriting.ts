@@ -39,36 +39,97 @@ const TIMEZONE_MAP: Record<string, { country: string; countryCode: string; city:
   "America/Puerto_Rico": { country: "Puerto Rico", countryCode: "PR", city: "San Juan" },
 };
 
-// Simple helper to guess location based on browser's timezone
+// Simple helper to guess location based on browser's timezone, focused on US
 function guessLocationFromTimezone(): UserLocation {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    if (!tz) return { city: "tu ciudad", country: "tu país", countryCode: "GEN" };
-
-    // Direct match
-    if (TIMEZONE_MAP[tz]) {
-      return TIMEZONE_MAP[tz];
-    }
-
-    // Prefix matches (e.g., America/Argentina/Buenos_Aires matches America/Argentina)
-    for (const key of Object.keys(TIMEZONE_MAP)) {
-      if (tz.startsWith(key)) {
-        return TIMEZONE_MAP[key];
+    if (tz && (tz.startsWith("America/") || tz.startsWith("US/"))) {
+      const parts = tz.split("/");
+      const cityPart = parts[parts.length - 1].replace(/_/g, " ");
+      const usCities: Record<string, string> = {
+        New_York: "Nueva York",
+        "New York": "Nueva York",
+        Los_Angeles: "Los Ángeles",
+        "Los Angeles": "Los Ángeles",
+        Chicago: "Chicago",
+        Miami: "Miami",
+        Houston: "Houston",
+        Phoenix: "Phoenix",
+        Philadelphia: "Filadelfia",
+        San_Antonio: "San Antonio",
+        "San Antonio": "San Antonio",
+        San_Diego: "San Diego",
+        "San Diego": "San Diego",
+        Dallas: "Dallas",
+        San_Jose: "San José",
+        "San Jose": "San José",
+        Austin: "Austin",
+        Jacksonville: "Jacksonville",
+        Fort_Worth: "Fort Worth",
+        "Fort Worth": "Fort Worth",
+        Columbus: "Columbus",
+        Charlotte: "Charlotte",
+        San_Francisco: "San Francisco",
+        "San Francisco": "San Francisco",
+        Indianapolis: "Indianápolis",
+        Seattle: "Seattle",
+        Denver: "Denver",
+        Boston: "Boston",
+        El_Paso: "El Paso",
+        "El Paso": "El Paso",
+        Nashville: "Nashville",
+        Detroit: "Detroit",
+        Oklahoma_City: "Oklahoma City",
+        "Oklahoma City": "Oklahoma City",
+        Portland: "Portland",
+        Las_Vegas: "Las Vegas",
+        "Las Vegas": "Las Vegas",
+        Memphis: "Memphis",
+        Louisville: "Louisville",
+        Baltimore: "Baltimore",
+        Milwaukee: "Milwaukee",
+        Albuquerque: "Albuquerque",
+        Tucson: "Tucson",
+        Fresno: "Fresno",
+        Sacramento: "Sacramento",
+        Mesa: "Mesa",
+        Atlanta: "Atlanta",
+        Kansas_City: "Kansas City",
+        "Kansas City": "Kansas City",
+        Colorado_Springs: "Colorado Springs",
+        "Colorado Springs": "Colorado Springs",
+        Omaha: "Omaha",
+        Raleigh: "Raleigh",
+        Virginia_Beach: "Virginia Beach",
+        "Virginia Beach": "Virginia Beach",
+        Long_Beach: "Long Beach",
+        "Long Beach": "Long Beach",
+        Miami_Beach: "Miami Beach",
+        "Miami Beach": "Miami Beach",
+        Orlando: "Orlando",
+        Tampa: "Tampa",
+      };
+      if (usCities[cityPart]) {
+        return { city: usCities[cityPart], country: "Estados Unidos", countryCode: "US" };
       }
-    }
-
-    // Latin American generic indicator
-    if (tz.startsWith("America/")) {
-      return { city: "tu ciudad", country: "Latinoamérica", countryCode: "LATAM" };
-    }
-    if (tz.startsWith("Europe/")) {
-      return { city: "tu ciudad", country: "Europa", countryCode: "EU" };
+      // Clean up any standard timezone city if not a LATAM country
+      if (
+        parts.length > 1 &&
+        !tz.includes("Argentina") &&
+        !tz.includes("Mexico") &&
+        !tz.includes("Bogota") &&
+        !tz.includes("Santiago") &&
+        !tz.includes("Caracas") &&
+        !tz.includes("Sao_Paulo")
+      ) {
+        return { city: cityPart, country: "Estados Unidos", countryCode: "US" };
+      }
     }
   } catch (e) {
     console.warn("No se pudo obtener la zona horaria:", e);
   }
 
-  return { city: "tu ciudad", country: "tu país", countryCode: "GEN" };
+  return { city: "Miami", country: "Estados Unidos", countryCode: "US" };
 }
 
 // Copywriting template design structure
@@ -79,6 +140,26 @@ interface CopyTemplate {
 
 // Standard copy translations mapped by Country Code & Time of Day
 const COPY_TEMPLATES: Record<string, Record<TimeOfDay, CopyTemplate>> = {
+  US: {
+    morning: {
+      headline:
+        'Empieza tu mañana en {City}<br/>con la pureza <span class="italic font-light text-gradient">del sonido.</span>',
+      subheadline:
+        "Transforma tus primeras horas con una elegancia acústica excepcional y diseño de vanguardia. Envíos gratis en 24-48h a todo Estados Unidos y pago único vía Zelle.",
+    },
+    afternoon: {
+      headline:
+        'Haz de tu tarde en {City}<br/>un momento <span class="italic font-light text-gradient">de puro lujo.</span>',
+      subheadline:
+        "No te conformes con lo ordinario hoy. Eleva tu tarde en {Country} con la máxima expresión de fidelidad de audio. Envíos prioritarios y pagos rápidos vía Zelle.",
+    },
+    night: {
+      headline:
+        'Desconéctate en {City}<br/>con sonido <span class="italic font-light text-gradient">envolvente.</span>',
+      subheadline:
+        "La noche es tuya en {Country}. Regálate un descanso sublime o sumérgete en tus listas de reproducción favoritas con un sonido de alta gama. Pago 100% seguro por Zelle.",
+    },
+  },
   ES: {
     morning: {
       headline:
@@ -205,9 +286,9 @@ const COPY_TEMPLATES: Record<string, Record<TimeOfDay, CopyTemplate>> = {
 export function useLocalizedCopy() {
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>("morning");
   const [location, setLocation] = useState<UserLocation>({
-    city: "tu ciudad",
-    country: "tu país",
-    countryCode: "GEN",
+    city: "Miami",
+    country: "Estados Unidos",
+    countryCode: "US",
   });
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -228,8 +309,7 @@ export function useLocalizedCopy() {
     setIsLoaded(true);
 
     // 3. Asynchronously fetch detailed IP location
-    // We fetch from a free, public IP API. If it succeeds, we update the state with precise values.
-    // This is entirely non-blocking and works as a progressive enhancement.
+    // We fetch from a free, public IP API. If it succeeds, we update the state with US-only values.
     let isSubscribed = true;
     fetch("https://ipapi.co/json/")
       .then((res) => {
@@ -237,14 +317,13 @@ export function useLocalizedCopy() {
         return res.json();
       })
       .then((data) => {
-        if (isSubscribed && data && data.city) {
-          // Translate some country codes or direct use
-          const countryName = data.country_name === "Spain" ? "España" : data.country_name;
-          const countryCode = data.country_code || "GEN";
+        if (isSubscribed && data) {
+          // Keep US strictly, use city if it's in US, otherwise fallback to Miami
+          const isUS = data.country_code === "US";
           setLocation({
-            city: data.city,
-            country: countryName,
-            countryCode: COPY_TEMPLATES[countryCode] ? countryCode : "GEN",
+            city: isUS && data.city ? data.city : "Miami",
+            country: "Estados Unidos",
+            countryCode: "US",
           });
         }
       })
@@ -260,8 +339,8 @@ export function useLocalizedCopy() {
     };
   }, []);
 
-  // Match the template according to country code (or generic fallback) and time of day
-  const activeTemplates = COPY_TEMPLATES[location.countryCode] || COPY_TEMPLATES.GEN;
+  // Match the template according to US country code and time of day
+  const activeTemplates = COPY_TEMPLATES.US;
   const template = activeTemplates[timeOfDay];
 
   // Capitalize city helper
